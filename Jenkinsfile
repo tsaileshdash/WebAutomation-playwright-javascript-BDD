@@ -12,10 +12,16 @@ pipeline {
             steps {
                 sh '''
                     echo "PATH=$PATH"
+                    echo "Node:"
                     which node
-                    which npm
                     node --version
+
+                    echo "NPM:"
+                    which npm
                     npm --version
+
+                    echo "Git:"
+                    git --version
                 '''
             }
         }
@@ -28,10 +34,10 @@ pipeline {
             }
         }
 
-        stage('Install Playwright Browsers') {
+        stage('Install Playwright Chromium') {
             steps {
                 dir('playwright-cucumber-framework') {
-                    sh 'npx playwright install'
+                    sh 'npx playwright install chromium'
                 }
             }
         }
@@ -46,9 +52,12 @@ pipeline {
     }
 
     post {
+
         always {
-            archiveArtifacts artifacts: 'playwright-cucumber-framework/reports/**/*', 
-                             allowEmptyArchive: true
+            archiveArtifacts(
+                artifacts: 'playwright-cucumber-framework/reports/**/*',
+                allowEmptyArchive: true
+            )
         }
 
         success {
