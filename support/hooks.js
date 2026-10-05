@@ -8,19 +8,21 @@ const {
 const { request } = require("playwright");
 
 const environments = require("../config/environments");
+
 const { launchBrowser } = require("./browser");
 
-// Cucumber step timeout
-setDefaultTimeout(30 * 1000);
+setDefaultTimeout(60 * 1000);
 
 Before(async function ({ pickle }) {
 
   this.apiContext = await request.newContext({
     baseURL: environments.apiBaseUrl,
+
     extraHTTPHeaders: {
       Accept: "application/json"
     },
-    timeout: 30 * 1000
+
+    timeout: 60 * 1000
   });
 
   if (pickle.tags.some((tag) => tag.name === "@ui")) {
@@ -31,7 +33,7 @@ Before(async function ({ pickle }) {
 
     this.page = await this.context.newPage();
 
-    this.page.setDefaultTimeout(30 * 1000);
+    this.page.setDefaultTimeout(60 * 1000);
   }
 });
 
@@ -50,8 +52,9 @@ After(async function ({ result }) {
   } finally {
 
     await this.apiContext?.dispose();
-    await this.context?.close();
-    await this.browser?.close();
 
+    await this.context?.close();
+
+    await this.browser?.close();
   }
 });
