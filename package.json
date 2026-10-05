@@ -1,0 +1,15 @@
+{
+  "name": "playwright-cucumber-framework",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright UI and API test automation with Cucumber",
+  "scripts": {
+    "test": "cucumber-js",
+    "test:ui": "cucumber-js --tags @ui",
+    "test:api": "cucumber-js --tags @api"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^11.0.1",
+    "playwright": "^1.49.1"
+  }
+}
