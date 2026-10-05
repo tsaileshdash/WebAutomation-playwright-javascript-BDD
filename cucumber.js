@@ -7,9 +7,5 @@ module.exports = {
       "support/**/*.js"
     ],
 
-    format: [
-      "progress",
-      "json:reports/cucumber.json"
-    ]
   }
 };

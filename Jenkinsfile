@@ -46,7 +46,7 @@ pipeline {
         stage('Prepare Cucumber reports') {
             steps {
                 dir('playwright-cucumber-framework') {
-                    sh 'mkdir -p reports'
+                    sh 'mkdir -p reports && rm -f reports/cucumber.json'
                 }
             }
         }
