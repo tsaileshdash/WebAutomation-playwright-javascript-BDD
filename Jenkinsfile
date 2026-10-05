@@ -62,7 +62,9 @@ pipeline {
                         echo "INSTALLING NPM DEPENDENCIES"
                         echo "======================================"
 
-                        npm ci
+                        npm ci --include=dev --bin-links=true
+
+                        node -e 'const fs = require("node:fs"); const path = "node_modules/@cucumber/cucumber/bin/cucumber.js"; if (!fs.existsSync(path)) throw new Error(`Cucumber CLI entry point was not installed: ${path}`); console.log(`Cucumber CLI entry point is available: ${path}`);'
                     '''
                 }
             }
@@ -110,7 +112,7 @@ pipeline {
                             returnStatus: true,
                             script: '''
                                 set +e
-                                ./node_modules/.bin/cucumber-js \
+                                node ./node_modules/@cucumber/cucumber/bin/cucumber.js \
                                     --format progress:reports/cucumber-progress.txt \
                                     --format json \
                                     > reports/cucumber.json
