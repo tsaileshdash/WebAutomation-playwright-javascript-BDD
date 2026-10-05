@@ -28,7 +28,7 @@ The test scripts write Cucumber JSON results to `reports/cucumber.json` and prog
 
 ## Run in Jenkins
 
-Configure a Jenkins Pipeline job to use `playwright-cucumber-framework/Jenkinsfile` as its script path. Install the **HTML Publisher** Jenkins plugin. The pipeline generates the HTML report from Cucumber JSON after the test run and adds a **Cucumber HTML Report** link to the build page. It archives report files from `reports/` even when tests fail.
+Configure a Jenkins Pipeline job to use `playwright-cucumber-framework/Jenkinsfile` as its script path. Install the **HTML Publisher** Jenkins plugin. The pipeline installs development dependencies, verifies Cucumber through `npm exec`, runs the project `npm test` script, validates its JSON output, and publishes the generated HTML report. It still generates and publishes the report when scenarios fail, then marks the build failed based on the test exit code. Report files are archived as build artifacts.
 
 ## Configuration
 
