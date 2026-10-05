@@ -24,7 +24,7 @@ npm run test:ui
 npm run test:api
 ```
 
-The test scripts write Cucumber JSON results to `reports/cucumber.json` and progress output to `reports/cucumber-progress.txt`. Run `npm run report` to generate a browsable HTML report at `reports/cucumber-html-report/index.html`. Step logs are sent to stderr to keep JSON output valid. Failed UI scenarios attach a screenshot to the Cucumber scenario result.
+The test scripts capture and validate Cucumber JSON results at `reports/cucumber.json` and progress output at `reports/cucumber-progress.txt`. Run `npm run report` to generate a browsable HTML report at `reports/cucumber-html-report/index.html`. Failed UI scenarios attach a screenshot to the Cucumber scenario result.
 
 ## Run in Jenkins
 

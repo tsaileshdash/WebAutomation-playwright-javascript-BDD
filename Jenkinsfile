@@ -94,6 +94,21 @@ pipeline {
             }
         }
 
+        stage('Prepare Cucumber Reports') {
+
+            steps {
+
+                dir('playwright-cucumber-framework') {
+
+                    sh '''
+                        rm -f reports/cucumber.json reports/cucumber-progress.txt
+                        rm -rf reports/cucumber-html-report
+                        mkdir -p reports
+                    '''
+                }
+            }
+        }
+
 
         /*
          * ============================================
