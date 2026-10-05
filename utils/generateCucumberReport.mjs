@@ -1,14 +1,14 @@
-import report from "multiple-cucumber-html-reporter";
+import { access, stat } from "node:fs/promises";
+import { generate } from "multiple-cucumber-html-reporter";
 
-console.log("======================================");
-console.log("GENERATING CUCUMBER HTML REPORT");
-console.log("======================================");
+const jsonDir = "./reports";
+const reportPath = "./reports/cucumber-html-report";
+const htmlReportPath = `${reportPath}/index.html`;
 
-report.generate({
-  jsonDir: "./reports",
-
-  reportPath: "./reports/cucumber-html-report",
-
+await access(`${jsonDir}/cucumber.json`);
+await generate({
+  jsonDir,
+  reportPath,
   metadata: {
     browser: {
       name: "chromium",
@@ -43,8 +43,9 @@ report.generate({
   }
 });
 
-console.log("======================================");
-console.log("CUCUMBER HTML REPORT GENERATED");
-console.log("======================================");
-console.log("Report location:");
-console.log("./reports/cucumber-html-report/index.html");
+const report = await stat(htmlReportPath);
+if (!report.isFile() || report.size === 0) {
+  throw new Error(`Cucumber HTML report was not generated at ${htmlReportPath}`);
+}
+
+console.info(`Cucumber HTML report generated: ${htmlReportPath}`);

@@ -130,59 +130,9 @@ pipeline {
                             echo "======================================"
 
                             npm test
+                            cat reports/cucumber-progress.txt
 
-
-                            echo ""
-                            echo "======================================"
-                            echo "CUCUMBER TEST EXECUTION COMPLETED"
-                            echo "======================================"
-
-
-                            echo ""
-                            echo "======================================"
-                            echo "CHECKING CUCUMBER JSON REPORT"
-                            echo "======================================"
-
-
-                            echo ""
-                            echo "Reports directory:"
-                            ls -lah reports
-
-
-                            echo ""
-                            echo "Report files:"
-                            find reports -maxdepth 2 -type f -print || true
-
-
-                            echo ""
-                            echo "Checking cucumber.json..."
-
-
-                            if [ -f reports/cucumber.json ]; then
-
-                                echo ""
-                                echo "SUCCESS: cucumber.json EXISTS"
-
-                                ls -lh reports/cucumber.json
-
-                                echo ""
-                                echo "Cucumber JSON file size:"
-
-                                wc -c reports/cucumber.json
-
-                            else
-
-                                echo ""
-                                echo "ERROR: cucumber.json DOES NOT EXIST"
-
-                                echo ""
-                                echo "Contents of reports directory:"
-
-                                ls -lah reports
-
-                                exit 1
-
-                            fi
+                            node -e 'const fs = require("node:fs"); const report = JSON.parse(fs.readFileSync("reports/cucumber.json", "utf8")); if (!Array.isArray(report) || report.length === 0) throw new Error("Cucumber JSON report is empty or invalid"); console.log(`Validated Cucumber JSON for ${report.length} feature(s)`);'
                         '''
                     }
                 }
@@ -207,56 +157,10 @@ pipeline {
                         echo "GENERATING CUCUMBER HTML REPORT"
                         echo "======================================"
 
-
-                        if [ -s reports/cucumber.json ]; then
-
-                            echo ""
-                            echo "Cucumber JSON report FOUND."
-
-                            echo ""
-                            echo "Running report generator..."
-
-                            npm run report
-
-
-                            echo ""
-                            echo "======================================"
-                            echo "CHECKING HTML REPORT"
-                            echo "======================================"
-
-
-                            if [ -f reports/cucumber-html-report/index.html ]; then
-
-                                echo ""
-                                echo "SUCCESS: Cucumber HTML report generated."
-
-                                echo ""
-                                echo "HTML report directory:"
-
-                                ls -lah reports/cucumber-html-report
-
-                                echo ""
-                                echo "HTML report file:"
-
-                                ls -lh reports/cucumber-html-report/index.html
-
-                            else
-
-                                echo ""
-                                echo "ERROR: Cucumber HTML report was NOT generated."
-
-                                exit 1
-
-                            fi
-
-                        else
-
-                            echo ""
-                            echo "ERROR: cucumber.json is missing or empty."
-
-                            exit 1
-
-                        fi
+                        test -s reports/cucumber.json
+                        npm run report
+                        test -s reports/cucumber-html-report/index.html
+                        echo "HTML report generated at reports/cucumber-html-report/index.html"
                     '''
                 }
             }
