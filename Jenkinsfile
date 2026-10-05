@@ -105,34 +105,32 @@ pipeline {
 
                 dir('playwright-cucumber-framework') {
 
-                    catchError(
-                        buildResult: 'FAILURE',
-                        stageResult: 'FAILURE'
-                    ) {
+                    script {
+                        env.CUCUMBER_TEST_STATUS = sh(
+                            returnStatus: true,
+                            script: '''
+                                set +e
+                                ./node_modules/.bin/cucumber-js \
+                                    --format progress:reports/cucumber-progress.txt \
+                                    --format json \
+                                    > reports/cucumber.json
+                                test_status=$?
 
-                        sh '''
-                            echo "======================================"
-                            echo "PREPARING REPORT DIRECTORY"
-                            echo "======================================"
+                                if [ -s reports/cucumber-progress.txt ]; then
+                                    cat reports/cucumber-progress.txt
+                                fi
 
-                            rm -rf reports
+                                if [ ! -s reports/cucumber.json ]; then
+                                    echo "Cucumber did not produce a JSON report." >&2
+                                    test_status=1
+                                elif ! node -e 'const fs = require("node:fs"); const report = JSON.parse(fs.readFileSync("reports/cucumber.json", "utf8")); if (!Array.isArray(report) || report.length === 0) throw new Error("Cucumber JSON report is empty");'; then
+                                    echo "Cucumber JSON report is invalid." >&2
+                                    test_status=1
+                                fi
 
-                            mkdir -p reports
-
-                            echo ""
-                            echo "Reports directory created:"
-                            ls -lah reports
-
-
-                            echo ""
-                            echo "======================================"
-                            echo "RUNNING CUCUMBER TESTS"
-                            echo "======================================"
-
-                            npm test
-
-                            node -e 'const fs = require("node:fs"); const report = JSON.parse(fs.readFileSync("reports/cucumber.json", "utf8")); if (!Array.isArray(report) || report.length === 0) throw new Error("Cucumber JSON report is empty or invalid"); console.log(`Validated Cucumber JSON for ${report.length} feature(s)`);'
-                        '''
+                                exit "$test_status"
+                            '''
+                        ).toString()
                     }
                 }
             }
@@ -156,11 +154,24 @@ pipeline {
                         echo "GENERATING CUCUMBER HTML REPORT"
                         echo "======================================"
 
-                        test -s reports/cucumber.json
-                        npm run report
-                        test -s reports/cucumber-html-report/index.html
-                        echo "HTML report generated at reports/cucumber-html-report/index.html"
+                        if [ -s reports/cucumber.json ]; then
+                            npm run report
+                            test -s reports/cucumber-html-report/index.html
+                            echo "HTML report generated at reports/cucumber-html-report/index.html"
+                        else
+                            echo "No Cucumber JSON was produced; HTML report generation is skipped."
+                        fi
                     '''
+                }
+            }
+        }
+
+        stage('Set Test Result') {
+            steps {
+                script {
+                    if (env.CUCUMBER_TEST_STATUS != '0') {
+                        error("Cucumber tests failed (exit status ${env.CUCUMBER_TEST_STATUS}). See the test output and published report.")
+                    }
                 }
             }
         }
