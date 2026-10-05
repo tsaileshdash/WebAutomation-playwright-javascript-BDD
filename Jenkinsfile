@@ -1,53 +1,62 @@
 pipeline {
-  agent any
 
-  options {
-    timestamps()
-  }
+    agent any
 
-  parameters {
-    choice(
-      name: "TEST_SUITE",
-      choices: ["all", "ui", "api"],
-      description: "Choose which Cucumber scenarios to run"
-    )
-  }
+    environment {
+        PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    }
 
-  environment {
-    CI = "true"
-  }
+    stages {
 
-  stages {
-    stage("Install dependencies") {
-      steps {
-        dir("playwright-cucumber-framework") {
-          sh "npm ci"
+        stage('Environment Check') {
+            steps {
+                sh '''
+                    echo "PATH=$PATH"
+                    which node
+                    which npm
+                    node --version
+                    npm --version
+                '''
+            }
         }
-      }
-    }
 
-    stage("Run tests") {
-      steps {
-        dir("playwright-cucumber-framework") {
-          sh '''
-            case "$TEST_SUITE" in
-              all) npm test ;;
-              ui) npm run test:ui ;;
-              api) npm run test:api ;;
-              *) echo "Unsupported TEST_SUITE: $TEST_SUITE" >&2; exit 2 ;;
-            esac
-          '''
+        stage('Install dependencies') {
+            steps {
+                dir('playwright-cucumber-framework') {
+                    sh 'npm ci'
+                }
+            }
         }
-      }
-    }
-  }
 
-  post {
-    always {
-      archiveArtifacts(
-        artifacts: "playwright-cucumber-framework/reports/cucumber-report.html",
-        allowEmptyArchive: true
-      )
+        stage('Install Playwright Browsers') {
+            steps {
+                dir('playwright-cucumber-framework') {
+                    sh 'npx playwright install'
+                }
+            }
+        }
+
+        stage('Run tests') {
+            steps {
+                dir('playwright-cucumber-framework') {
+                    sh 'npm test'
+                }
+            }
+        }
     }
-  }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'playwright-cucumber-framework/reports/**/*', 
+                             allowEmptyArchive: true
+        }
+
+        success {
+            echo 'Cucumber tests PASSED'
+        }
+
+        failure {
+            echo 'Cucumber tests FAILED'
+        }
+    }
 }
