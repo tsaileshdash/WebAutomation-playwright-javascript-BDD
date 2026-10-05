@@ -4,9 +4,9 @@
   "private": true,
   "description": "Playwright UI and API test automation with Cucumber",
   "scripts": {
-    "test": "mkdir -p reports && cucumber-js --format progress --format json:reports/cucumber.json",
-    "test:ui": "mkdir -p reports && cucumber-js --tags @ui --format progress --format json:reports/cucumber.json",
-    "test:api": "mkdir -p reports && cucumber-js --tags @api --format progress --format json:reports/cucumber.json",
+    "test": "mkdir -p reports && cucumber-js --format progress:reports/cucumber-progress.txt --format json > reports/cucumber.json",
+    "test:ui": "mkdir -p reports && cucumber-js --tags @ui --format progress:reports/cucumber-progress.txt --format json > reports/cucumber.json",
+    "test:api": "mkdir -p reports && cucumber-js --tags @api --format progress:reports/cucumber-progress.txt --format json > reports/cucumber.json",
     "report": "node utils/generateCucumberReport.mjs"
   },
   "devDependencies": {

@@ -130,7 +130,6 @@ pipeline {
                             echo "======================================"
 
                             npm test
-                            cat reports/cucumber-progress.txt
 
                             node -e 'const fs = require("node:fs"); const report = JSON.parse(fs.readFileSync("reports/cucumber.json", "utf8")); if (!Array.isArray(report) || report.length === 0) throw new Error("Cucumber JSON report is empty or invalid"); console.log(`Validated Cucumber JSON for ${report.length} feature(s)`);'
                         '''
