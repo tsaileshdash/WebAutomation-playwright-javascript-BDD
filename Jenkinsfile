@@ -12,6 +12,7 @@ pipeline {
             steps {
                 sh '''
                     echo "PATH=$PATH"
+
                     echo "Node:"
                     which node
                     node --version
@@ -49,22 +50,37 @@ pipeline {
                 }
             }
         }
+
+        stage('Generate Cucumber Report') {
+            steps {
+                dir('playwright-cucumber-framework') {
+                    sh 'npm run report'
+                }
+            }
+        }
     }
 
     post {
 
         always {
-            cucumber(
-                buildStatus: 'UNSTABLE',
-                fileIncludePattern: '**/cucumber.json',
-                jsonReportDirectory: 'playwright-cucumber-framework/reports',
-                trendsLimit: 10
-            )
+
+            echo 'Archiving Cucumber reports...'
 
             archiveArtifacts(
                 artifacts: 'playwright-cucumber-framework/reports/**/*',
                 allowEmptyArchive: true
             )
+
+            echo 'Publishing Cucumber HTML report...'
+
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'playwright-cucumber-framework/reports/cucumber-html-report',
+                reportFiles: 'index.html',
+                reportName: 'Cucumber HTML Report'
+            ])
         }
 
         success {
