@@ -24,11 +24,11 @@ npm run test:ui
 npm run test:api
 ```
 
-The default Cucumber profile writes an HTML report to `reports/cucumber-report.html`. Failed UI scenarios attach a screenshot to the Cucumber report.
+The default Cucumber profile writes an HTML report to `reports/cucumber-report.html` and a JSON report to `reports/cucumber.json`. Failed UI scenarios attach a screenshot to the Cucumber HTML report.
 
 ## Run in Jenkins
 
-Configure a Jenkins Pipeline job to use `playwright-cucumber-framework/Jenkinsfile` as its script path. The Jenkins controller/agent must have the Docker Pipeline plugin and access to pull and run Docker images. The pipeline uses the official Playwright `v1.63.0-noble` image, matching the locked Playwright version, and offers an `all`, `ui`, or `api` suite parameter. The Cucumber HTML report is archived after each build, including failed test runs.
+Configure a Jenkins Pipeline job to use `playwright-cucumber-framework/Jenkinsfile` as its script path. Install the **Cucumber Reports** Jenkins plugin so the pipeline can publish the JSON report. After a build, open the build page and select **Cucumber reports** to browse scenario results and trends. The pipeline also archives report files from `reports/`, including after failed test runs.
 
 ## Configuration
 

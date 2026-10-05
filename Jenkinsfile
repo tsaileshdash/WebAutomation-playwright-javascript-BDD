@@ -54,6 +54,13 @@ pipeline {
     post {
 
         always {
+            cucumber(
+                buildStatus: 'UNSTABLE',
+                fileIncludePattern: '**/cucumber.json',
+                jsonReportDirectory: 'playwright-cucumber-framework/reports',
+                trendsLimit: 10
+            )
+
             archiveArtifacts(
                 artifacts: 'playwright-cucumber-framework/reports/**/*',
                 allowEmptyArchive: true
