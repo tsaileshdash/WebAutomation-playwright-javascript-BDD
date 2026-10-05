@@ -4,7 +4,7 @@ A JavaScript test automation framework for browser UI and HTTP API scenarios, us
 
 ## Requirements
 
-- Node.js 18 or later
+- Node.js 22 or later
 - npm
 
 ## Setup
@@ -24,11 +24,11 @@ npm run test:ui
 npm run test:api
 ```
 
-The default Cucumber profile writes an HTML report to `reports/cucumber-report.html` and a JSON report to `reports/cucumber.json`. Failed UI scenarios attach a screenshot to the Cucumber HTML report.
+The default Cucumber profile writes JSON results to `reports/cucumber.json`. Run `npm run report` to generate a browsable HTML report under `reports/html/`. Failed UI scenarios attach a screenshot to the Cucumber scenario result.
 
 ## Run in Jenkins
 
-Configure a Jenkins Pipeline job to use `playwright-cucumber-framework/Jenkinsfile` as its script path. Install the **Cucumber Reports** Jenkins plugin so the pipeline can publish the JSON report. After a build, open the build page and select **Cucumber reports** to browse scenario results and trends. The pipeline also archives report files from `reports/`, including after failed test runs.
+Configure a Jenkins Pipeline job to use `playwright-cucumber-framework/Jenkinsfile` as its script path. Install the **HTML Publisher** Jenkins plugin. The pipeline generates the HTML report from Cucumber JSON after the test run and adds a **Cucumber HTML Report** link to the build page. It archives report files from `reports/` even when tests fail.
 
 ## Configuration
 

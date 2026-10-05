@@ -60,7 +60,6 @@ pipeline {
                     ) {
                         sh '''
                             npm test
-                            test -s reports/cucumber-report.html
                             test -s reports/cucumber.json
                         '''
                     }
@@ -72,24 +71,32 @@ pipeline {
     post {
 
         always {
+            dir('playwright-cucumber-framework') {
+                script {
+                    if (fileExists('reports/cucumber.json')) {
+                        echo 'Generating Cucumber HTML report...'
+                        sh 'npm run report'
 
-            echo 'Archiving Cucumber reports...'
+                        echo 'Publishing Cucumber HTML report...'
+                        publishHTML([
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: 'reports/html',
+                            reportFiles: 'index.html',
+                            reportName: 'Cucumber HTML Report'
+                        ])
+                    } else {
+                        echo 'Cucumber JSON report was not generated; no HTML report to publish.'
+                    }
+                }
 
-            archiveArtifacts(
-                artifacts: 'playwright-cucumber-framework/reports/**/*',
-                allowEmptyArchive: true
-            )
-
-            echo 'Publishing Cucumber HTML report...'
-
-            publishHTML([
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'playwright-cucumber-framework/reports',
-                reportFiles: 'cucumber-report.html',
-                reportName: 'Cucumber HTML Report'
-            ])
+                echo 'Archiving Cucumber reports...'
+                archiveArtifacts(
+                    artifacts: 'reports/**/*',
+                    allowEmptyArchive: true
+                )
+            }
         }
 
         success {

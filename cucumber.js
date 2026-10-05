@@ -9,7 +9,6 @@ module.exports = {
 
     format: [
       "progress",
-      "html:reports/cucumber-report.html",
       "json:reports/cucumber.json"
     ]
   }
