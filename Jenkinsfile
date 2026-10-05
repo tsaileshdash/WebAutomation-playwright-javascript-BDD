@@ -43,18 +43,27 @@ pipeline {
             }
         }
 
+        stage('Prepare Cucumber reports') {
+            steps {
+                dir('playwright-cucumber-framework') {
+                    sh 'mkdir -p reports'
+                }
+            }
+        }
+
         stage('Run tests') {
             steps {
-
                 dir('playwright-cucumber-framework') {
-
                     catchError(
                         buildResult: 'FAILURE',
                         stageResult: 'FAILURE'
                     ) {
-                        sh 'npm test'
+                        sh '''
+                            npm test
+                            test -s reports/cucumber-report.html
+                            test -s reports/cucumber.json
+                        '''
                     }
-
                 }
             }
         }
@@ -74,7 +83,7 @@ pipeline {
             echo 'Publishing Cucumber HTML report...'
 
             publishHTML([
-                allowMissing: false,
+                allowMissing: true,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
                 reportDir: 'playwright-cucumber-framework/reports',

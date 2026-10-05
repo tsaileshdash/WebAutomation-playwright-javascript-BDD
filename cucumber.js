@@ -11,8 +11,6 @@ module.exports = {
       "progress",
       "html:reports/cucumber-report.html",
       "json:reports/cucumber.json"
-    ],
-
-    publishQuiet: true
+    ]
   }
 };
