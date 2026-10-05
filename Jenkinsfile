@@ -11,83 +11,172 @@ pipeline {
         stage('Environment Check') {
             steps {
                 sh '''
+                    echo "======================================"
+                    echo "ENVIRONMENT CHECK"
+                    echo "======================================"
+
                     echo "PATH=$PATH"
 
+                    echo ""
                     echo "Node:"
                     which node
                     node --version
 
+                    echo ""
                     echo "NPM:"
                     which npm
                     npm --version
 
+                    echo ""
                     echo "Git:"
                     git --version
                 '''
             }
         }
 
-        stage('Install dependencies') {
+
+        stage('Install Dependencies') {
             steps {
+
                 dir('playwright-cucumber-framework') {
-                    sh 'npm ci'
+
+                    sh '''
+                        echo "======================================"
+                        echo "INSTALLING NPM DEPENDENCIES"
+                        echo "======================================"
+
+                        npm ci
+                    '''
                 }
             }
         }
+
 
         stage('Install Playwright Chromium') {
             steps {
+
                 dir('playwright-cucumber-framework') {
-                    sh 'npx playwright install chromium'
+
+                    sh '''
+                        echo "======================================"
+                        echo "INSTALLING PLAYWRIGHT CHROMIUM"
+                        echo "======================================"
+
+                        npx playwright install chromium
+                    '''
                 }
             }
         }
 
-        stage('Run tests') {
+
+        stage('Run Cucumber Tests') {
             steps {
+
                 dir('playwright-cucumber-framework') {
 
                     catchError(
                         buildResult: 'FAILURE',
                         stageResult: 'FAILURE'
                     ) {
-                        sh 'npm test'
-                    }
 
-                    echo 'Checking generated Cucumber reports...'
+                        sh '''
+                            echo "======================================"
+                            echo "CLEANING REPORT DIRECTORY"
+                            echo "======================================"
 
-                    sh '''
-                        echo "===== REPORT DIRECTORY ====="
+                            rm -rf reports
 
-                        if [ -d reports ]; then
+                            mkdir -p reports
+
+
+                            echo "======================================"
+                            echo "RUNNING CUCUMBER TESTS"
+                            echo "======================================"
+
+                            npm test
+
+
+                            echo "======================================"
+                            echo "CHECKING CUCUMBER JSON REPORT"
+                            echo "======================================"
+
+                            echo "Report directory:"
+
                             ls -lah reports
-                        else
-                            echo "Reports directory does not exist."
-                        fi
 
-                        echo "===== REPORT FILES ====="
 
-                        find reports -maxdepth 2 -type f -print 2>/dev/null || true
-                    '''
+                            echo ""
+                            echo "Report files:"
+
+                            find reports -maxdepth 2 -type f -print || true
+
+
+                            echo ""
+                            echo "Checking cucumber.json..."
+
+                            if [ -s reports/cucumber.json ]; then
+
+                                echo "SUCCESS: Cucumber JSON report found."
+
+                                ls -lh reports/cucumber.json
+
+                            else
+
+                                echo "ERROR: Cucumber JSON report was NOT generated."
+
+                                exit 1
+
+                            fi
+                        '''
+                    }
                 }
             }
         }
 
-        stage('Generate Cucumber Report') {
+
+        stage('Generate Cucumber HTML Report') {
             steps {
+
                 dir('playwright-cucumber-framework') {
 
                     sh '''
+                        echo "======================================"
+                        echo "GENERATING CUCUMBER HTML REPORT"
+                        echo "======================================"
+
                         if [ -s reports/cucumber.json ]; then
 
                             echo "Cucumber JSON report found."
-                            echo "Generating HTML report..."
+
+                            echo ""
+                            echo "Running HTML report generator..."
 
                             npm run report
 
+                            echo ""
+                            echo "======================================"
+                            echo "CHECKING HTML REPORT"
+                            echo "======================================"
+
+                            if [ -f reports/cucumber-html-report/index.html ]; then
+
+                                echo "SUCCESS: Cucumber HTML report generated."
+
+                                ls -lah reports/cucumber-html-report
+
+                            else
+
+                                echo "ERROR: Cucumber HTML report was NOT generated."
+
+                                exit 1
+
+                            fi
+
                         else
 
-                            echo "Cucumber JSON report was not generated."
+                            echo "ERROR: Cucumber JSON report does not exist."
+
+                            exit 1
 
                         fi
                     '''
@@ -95,6 +184,7 @@ pipeline {
             }
         }
     }
+
 
     post {
 
@@ -104,11 +194,15 @@ pipeline {
 
                 script {
 
+                    echo "======================================"
+                    echo "PUBLISHING CUCUMBER REPORT"
+                    echo "======================================"
+
                     if (fileExists('reports/cucumber-html-report/index.html')) {
 
-                        echo 'Cucumber HTML report found.'
+                        echo "Cucumber HTML report found."
 
-                        echo 'Publishing Cucumber HTML report...'
+                        echo "Publishing Cucumber HTML report..."
 
                         publishHTML([
                             allowMissing: false,
@@ -121,26 +215,38 @@ pipeline {
 
                     } else {
 
-                        echo 'Cucumber HTML report was not generated.'
+                        echo "Cucumber HTML report was NOT generated."
 
                     }
+
+
+                    echo "======================================"
+                    echo "ARCHIVING REPORTS"
+                    echo "======================================"
+
+                    archiveArtifacts(
+                        artifacts: 'reports/**/*',
+                        allowEmptyArchive: true
+                    )
                 }
-
-                echo 'Archiving Cucumber reports...'
-
-                archiveArtifacts(
-                    artifacts: 'reports/**/*',
-                    allowEmptyArchive: true
-                )
             }
         }
 
+
         success {
-            echo 'Cucumber tests PASSED'
+
+            echo "======================================"
+            echo "CUCUMBER TESTS PASSED"
+            echo "CUCUMBER REPORT GENERATED"
+            echo "======================================"
         }
 
+
         failure {
-            echo 'Cucumber tests FAILED'
+
+            echo "======================================"
+            echo "CUCUMBER TESTS FAILED"
+            echo "======================================"
         }
     }
 }

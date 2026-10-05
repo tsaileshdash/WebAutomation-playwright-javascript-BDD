@@ -2,6 +2,7 @@ import report from "multiple-cucumber-html-reporter";
 
 report.generate({
   jsonDir: "./reports",
+
   reportPath: "./reports/cucumber-html-report",
 
   metadata: {
